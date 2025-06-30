@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struttura Gerarchica di Categorie e Articoli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50, #4b79a1);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #2c3e50, #4b79a1);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 25px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+        
+        .content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .search-box {
+            display: flex;
+            margin: 0 auto 30px;
+            width: 90%;
+            max-width: 800px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 18px 25px;
+            border: none;
+            font-size: 1.1rem;
+            outline: none;
+        }
+        
+        .search-box button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0 35px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: #2980b9;
+        }
+        
+        .category {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            background: white;
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+        }
+        
+        .category-header {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .category-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .category-header i {
+            transition: transform 0.3s;
+        }
+        
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .category.expanded .category-content {
+            max-height: 2000px;
+        }
+        
+        .category.expanded .category-header i {
+            transform: rotate(180deg);
+        }
+        
+        .subcategory {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .subcategory:last-child {
+            border-bottom: none;
+        }
+        
+        .subcategory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .subcategory-header h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subcategory-header i {
+            transition: transform 0.3s;
+        }
+        
+        .subcategory.expanded .subcategory-header i {
+            transform: rotate(180deg);
+        }
+        
+        .articles {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        
+        .subcategory.expanded .articles {
+            max-height: 1000px;
+        }
+        
+        .article-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .article-list li {
+            padding: 12px 15px;
+            border-bottom: 1px dashed #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+        
+        .article-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .article-list li:hover {
+            background: #f0f7ff;
+        }
+        
+        .article-list li i {
+            color: #3498db;
+            font-size: 0.9rem;
+        }
+        
+        .article-list li a {
+            color: #2c3e50;
+            text-decoration: none;
+            flex: 1;
+            transition: color 0.2s;
+        }
+        
+        .article-list li a:hover {
+            color: #e74c3c;
+            text-decoration: underline;
+        }
+        
+        .disclaimer-content {
+            padding: 20px;
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .disclaimer-content strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: #2c3e50;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        /* Stili per i risultati di ricerca */
+        .highlight {
+            background-color: #ffeb3b;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .search-results-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-item {
+                flex: 1 0 40%;
+                margin-bottom: 15px;
+            }
+            
+            .category-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .subcategory-header h3 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-sitemap"></i> Struttura Categorie e Articoli</h1>
+            <p class="subtitle">Gerarchia completa con categorie, sottocategorie e articoli espandibili</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Categorie</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">85+</div>
+                    <div class="stat-label">Articoli</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">17</div>
+                    <div class="stat-label">Sottocategorie</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Cerca articoli, categorie o parole chiave...">
+                <button id="search-button"><i class="fas fa-search"></i> CERCA</button>
+            </div>
+
+            <div id="search-results-message" class="search-results-message" style="display: none;"></div>
+
+            <!-- AVVERTENZE LEGALI -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> AVVERTENZE LEGALI</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="disclaimer-content">
+                        <strong>Disclaimer e Avvertenze Legali</strong>
+                        <p>Le informazioni contenute in questo sito sono fornite a scopo puramente informativo e non costituiscono consulenza legale o finanziaria. Non ci assumiamo alcuna responsabilità per eventuali errori, omissioni o conseguenze derivanti dall'utilizzo di queste informazioni.</p>
+                        <p>Si raccomanda di consultare sempre un professionista qualificato prima di prendere decisioni finanziarie o legali. L'accesso e l'utilizzo di questo sito costituiscono accettazione di queste condizioni.</p>
+                        <p>Per il disclaimer completo, consultare il link sottostante:</p>
+                    </div>
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Documenti Legali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-file-contract"></i> <a href="https://cryptohorizonbanksolution.com/avvertenze-legali">Avvertenze Legali</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoria 1 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-gavel"></i> 1. Normative e Regolamentazioni</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Normative principali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280017/">Tendenze Future 2025–2027: Regolamentazione, CBDC e Pressioni Internazionali</a></li>
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279645/">DAC8: La Nuova Frontiera del CRS per i Crypto-Asset Service Providers (CASP)</a></li>
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278544/">Elenco degli Stati che non hanno aderito al Common Reporting Standard (CRS) 2024</a></li>
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277967/">Esterovestizione, Elusione, Evasione Fiscale e Transfer Pricing</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Banche e compliance</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279222/">Banche Crypto-Friendly</a></li>
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279221/">Differenze tra Banche, Fintech, Neobanche</a></li>
+                                <li><i class="fas fa-file-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279220/">Due Diligence (cos'è)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 2 (rimosso "expanded" per chiudere al caricamento) -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-university"></i> 2. Banche e Servizi Finanziari</h2>
+                     <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Banche Offshore Online</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280003/sand dollar-(bahamas-caraibi)---cbdc-retail---central bank of the bahamas">Sand Dollar (Bahamas, Caraibi) - CBDC retail - Central Bank of The Bahamas</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279487/charles-scwab-international-bank-usa">Charles Scwab International Bank USA</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279142/jetonbank-(dominica-america-centrale)-aziende">Jetonbank (Dominica, America Centrale) Aziende</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278035/fv-bank/">FV BANK (Porto Rico)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278018/xapo-bank---gibilterra-(uk)">XAPO BANK - Gibilterra (Uk)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278011/bank-one-(mauritius)">Bank One (Mauritius)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277835/caye-international-bank---belize">Caye International Bank (Belize)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278676/">EQIBank (Dominica)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277817/the-kingdom-bank-(dominica-caraibi)">The Kingdom Bank (Dominica, Caraibi)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Banche Offshore Tradizionali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279320/">Banche Tradizionali Vietnamite (Vietcombank, Sacombank)</a></li>
+                                 <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278675/towerbank-(panama-america-centrale)-aziende-e-persone-fisiche">Towerbank (Panama, America Centrale) AZIENDE e persone Fisiche</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278611/">Mercantil Banco – Venezuela (Caracas e Isla Margarita)</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278610/">Banesco – Venezuela (Caracas e Isla Margarita)</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278609/">Bancamiga – Venezuela (Caracas)</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278608/">Banco de Venezuela (BDV) – Venezuela (Caracas)</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278574/">Erste Bank Croazia (Croazia – Europa Centrale)</a></li>
+                                <li><i class="fas fa-landmark"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278573/">Metrobank (Filippine – Sud-Est Asiatico)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Fintech e Neobanche</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279626/chivo-wallet-(el-salvador-america-centrale)">Chivo Wallet (El Salvador, America Centrale)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279322/payoneer-inc-usa">Payoneer Inc. USA</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279321/timo-–-banca-digitale-vietnamita-🇻🇳">Timo – Banca Digitale (Vietnam 🇻🇳)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279319/plasbit-–-fintech-crypto-friendly-(vietnam-🇻🇳)">PlasBit – Fintech Crypto-Friendly (Vietnam 🇻🇳)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279318/onesafe-–-neo-banca-fintech-usa-🇺🇸">OneSafe – Neo-Banca Fintech (USA 🇺🇸)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279143/bananacrystal-(stati-uniti-🇺🇸-–-wyoming)-aziende-e-persone-fisiche">BananaCrystal (Stati Uniti 🇺🇸 – Wyoming) Aziende e persone Fisiche</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279122/gnosis-pay-(🇪🇺-paese:-spagna---unione-europea)">Gnosis Pay (🇪🇺 Paese: Spagna - Unione Europea)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279121/moon-(pay-with-moon)-(usasingapore-based)">Moon (Pay with Moon) (USA/Singapore-based)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279117/zypto-(paesearea-geografica-nc)">Zypto (Paese/area geografica NC)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279114/solcard-(singapore)">SolCard (Singapore)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279113/wirex-fca-(regno-unito)">Wirex FCA (Regno Unito)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279112/nuvei-(canada-nord-america--globale)">Nuvei (Canada, Nord America / Globale)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279059/banxe-(regno-unito-inghilterra-e-galles)">Banxe (Regno Unito, Inghilterra e Galles)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278880/xkard-by-xhype-aziende-e-persone-fisiche">xKard by XHYPE Aziende e Persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278613/cashea-–-venezuela-(caracas)-persone-fisiche">Cashea – Venezuela (Caracas) persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278612/zinli-–-panama-(operante-in-venezuela)-persone-fisiche">Zinli – Panama (operante in Venezuela) persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278604/paypal-(usa---nord-america--globale)-aziende-e-persone-fsiche">PayPal (USA - Nord America / Globale) AZIENDE e persone Fsiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278603/wise-(regno-unito-–-europa)-aziende-e-persone-fisiche">Wise (Regno Unito – Europa) AZIENDE e persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278601/wealthfront-(usa-–-nord-america)-persone-fisiche">Wealthfront (USA – Nord America) Persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278598/marcus-by-goldman-sachs-(stati-uniti-–-globale)-persone-fisiche">Marcus by Goldman Sachs (Stati Uniti – Globale) Persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278597/airtm-(stati-uniti-–-globale)-aziende-e-persone-fisiche">Airtm (Stati Uniti – Globale) Aziende e persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278594/icard-(bulgaria-–-europa)-aziende-e-persone-fisiche">iCard (Bulgaria – Europa) Aziende e Persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278589/starling-bank-(regno-unito-–-europa-occidentale)">Starling Bank (Regno Unito – Europa Occidentale)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278572/nebeus-(spagna-–-europa-occidentale)">Nebeus (Spagna – Europa Occidentale)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278571/nubank-(brasile)-neobanca--fintech">Nubank (Brasile) Neobanca / Fintech</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278024/blackcatcard---malta-(eu)">Blackcatcard - Malta (EU)</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278021/jeton-bank---retail-europa-persone-fisiche">Jeton Bank - Retail Europa Persone Fisiche</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https:////cryptohorizonbanksolution.com/blog-detail/post/278014/bankera-online-bank---lituania">Bankera online Bank - Lituania</a></li>
+                                <li><i class="fas fa-building"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277813/meru-bank">Meru Bank (getmeru.com)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Categoria 3 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-credit-card"></i> 3. Carte di Pagamento e Servizi Finanziari Digitali</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Carte Crypto (virtuali e Fisiche)</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279143/bananacrystal-(stati-uniti-🇺🇸-–-wyoming)-aziende-e-persone-fisiche">BananaCrystal (Stati Uniti 🇺🇸 – Wyoming) Aziende e persone Fisiche</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279122/gnosis-pay-(🇪🇺-paese:-spagna---unione-europea)">Gnosis Pay (🇪🇺 Paese: Spagna - Unione Europea)</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279121/moon-(pay-with-moon)-(usasingapore-based)">Moon (Pay with Moon) (USA/Singapore-based))</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279117/zypto-(paesearea-geografica-nc)">Zypto (Paese/area geografica NC)</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279114/solcard-(singapore)">SolCard (Singapore)</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="/https://cryptohorizonbanksolution.com/blog-detail/post/279112/nuvei-(canada-nord-america--globale)">Nuvei (Canada, Nord America / Globale)</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https//cryptohorizonbanksolution.com/blog-detail/post/278880/xkard-by-xhype-aziende-e-persone-fisiche">xKard by XHYPE Aziende e Persone Fisiche</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278612/zinli-–-panama-(operante-in-venezuela)-persone-fisiche">Zinli – Panama (operante in Venezuela) persone Fisiche</a></li>
+                                <li><i class="fas fa-credit-card"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278597/airtm-(stati-uniti-–-globale)-aziende-e-persone-fisiche">Airtm (Stati Uniti – Globale) Aziende e persone Fisiche</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278594/icard-(bulgaria-–-europa)-aziende-e-persone-fisiche">iCard (Bulgaria – Europa) Aziende e Persone Fisiche</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278572/nebeus-(spagna-–-europa-occidentale)">Nebeus (Spagna – Europa Occidentale)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278571/nubank-(brasile)-neobanca--fintech">Nubank (Brasile) Neobanca / Fintech</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278024/blackcatcard---malta-(eu)">Blackcatcard - Malta (EU)</a></li>
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277970/meta-genesis-card-standard--platinum-(metal)">Meta Genesis Card Standard & Platinum (Metal)</a></li>  
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277838/kast-card">Kast Card</a></li>  
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277837/redotpay-card">Redotpay Card (Hong Kong)</a></li>  
+                                <li><i class="fas fa-mobile-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277813/meru-bank-(getmerucom)">Meru Bank (getmeru.com)</a></li>  
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 4 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-passport"></i> 4. Residenze Fiscali e Cittadinanza</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Residenze Fiscali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277966/residenza-fiscale-a-panama">Residenza Fiscale a Panama</a></li>
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277925/residenza-fiscale-in-paraguay:-guida-completa-per-cittadini-italiani">Residenza Fiscale in Paraguay: Guida Completa per Cittadini Italiani</a></li>
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277927/palau-rns:-la-residenza-non-domiciliata-digitale">Palau RNS: La Residenza Non-Domiciliata Digitale</a></li>
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277881/residenza-fiscale-in-generale">Residenza Fiscale In Generale</a></li>
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277850/residenza-a-cipro-nord-(trnc)">Residenza a Cipro Nord (TRNC)</a></li>
+                                <li><i class="fas fa-home"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277848/residenza-a-cipro-sud-(ue)">Residenza a Cipro Sud (UE)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Cittadinanza</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-globe"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277968/acquisto-di-un-secondo-passaporto-vs-cittadinanza-e-costi">Acquisto di un secondo passaporto vs. cittadinanza e costi</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Categoria 5 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fab fa-bitcoin"></i> 5. Cryptovalute e Blockchain</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Exchange Crypto</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280016/primexbt-derivaticfd-su-crypto-forex-materie-prime-indici">PrimeXBT derivati/CFD su crypto, forex, materie prime, indici</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280015/kucoin-(registrato-alle-seychelles)">KuCoin (registrato alle Seychelles)</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280014/hodl-hodl---regno-unito-exchange-peer-to-peer-(p2p)">Hodl Hodl - Regno Unito exchange peer-to-peer (P2P)</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280013/coinex">CoinEx</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280012/bybit:-exchange-centralizzato-per-spot-derivati-e-oltre-🌍">Bybit: Exchange centralizzato per spot, derivati e oltre</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280010/mexc-global-(mahé-seychelles)">MEXC Global (Mahé, Seychelles)</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280009/pancakeswap:-lo-scambio-decentralizzato-su-binance-smart-chain">PancakeSwap: Lo scambio decentralizzato su Binance Smart Chain</a></li>
+                                <li><i class="fas fa-exchange-alt"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280008/uniswap:-la-piattaforma-decentralizzata-di-scambio-di-criptovalute">Uniswap: La piattaforma decentralizzata di scambio di criptovalute</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Wallet e Portafogli</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279626/chivo-wallet-(el-salvador-america-centrale)">Chivo Wallet (El Salvador, America Centrale)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279319/plasbit-–-fintech-crypto-friendly-vietnamita-🇻🇳">PlasBit – Fintech Crypto-Friendly Vietnamita</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279122/gnosis-pay-(🇪🇺-paese:-spagna---unione-europea)">Gnosis Pay (Spagna - Unione Europea)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279121/moon-(pay-with-moon)-(usasingapore-based)">Moon (Pay with Moon) (USA/Singapore-based)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279117/zypto-(paesearea-geografica)">Zypto (Paese/area geografica)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279114/solcard-(singapore)">SolCard (Singapore)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278880/xkard-by-xhype-aziende-e-persone-fisiche">xKard by XHYPE</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/278024/blackcatcard---malta-(eu)">Blackcatcard - Malta (EU)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https//cryptohorizonbanksolution.com/blog-detail/post/277970/meta-genesis-card-standard--platinum-(metal)">Meta Genesis Card Standard & Platinum (Metal)</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277838/kast-card">Kast Card</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277837/redotpay-card">Redotpay Card</a></li>
+                                  </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Wallet WEB3</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280092/guida-completa-a-metamask:-il-wallet-web3-per-il-futuro-delle-criptovalute">Metamask</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280093/guida-completa-a-phantom:-il-wallet-web3-per-solana-e-oltre">Phantom</a></li>
+                                <li><i class="fas fa-wallet"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280094/guida-completa-a-trust-wallet:-il-portafoglio-multichain-per-criptovalute-e-nft">Trust Wallet</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+          
+            
+            <!-- Categoria 6 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-chart-line"></i> 6. Finanza Personale e Gestione Patrimoniale</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Gestione Patrimoniale</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-piggy-bank"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/277852/brevi-cenni-di-finanza-personale">Brevi cenni di Finanza Personale</a></li>
+                                <li><i class="fas fa-piggy-bank"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279223/trust:-cos’è-origini-tipologie-scopi-e-giurisdizioni">TRUST: Cos’è, Origini, Tipologie, Scopi e Giurisdizioni</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 7 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-brain"></i> 7. Analisi e Strategie Economiche</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Analisi di Mercato</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-chart-bar"></i> <a href="">in arrivo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 8 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-building"></i> 8. Società e Strutture Aziendali</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Società Offshore</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-globe-americas"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/279224/cosa-sono-le-società-offshore">Cosa Sono le Società Offshore?</a></li>
+                                <li><i class="fas fa-globe-americas"></i> <a href="https:////cryptohorizonbanksolution.com/blog-detail/post/280278/giurisdizioni-preferite-per-le-società-offshore:-analisi-vantaggi-e-considerazioni">Giurisdizioni Preferite per le Società Offshore: Analisi, Vantaggi e Considerazioni</a></li>
+                                <li><i class="fas fa-globe-americas"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280277/vantaggi-e-svantaggi-delle-società-offshore">Vantaggi e Svantaggi delle Società Offshore</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 9 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-book"></i> 9. Guide e Tutorial</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Guide per Principianti</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-graduation-cap"></i> <a href="#">in arrivo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 10 -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-newspaper"></i> 10. News e Aggiornamenti</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Ultime Notizie</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-bullhorn"></i> <a href="#">Cambiamenti nelle Politiche Fiscali Globali</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categoria 11: LIBRI -->
+            <div class="category">
+                <div class="category-header">
+                    <h2><i class="fas fa-book"></i> 11. Libri in Vendita</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Collana IL VELO</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280296/il-nome-il-numero-la-gabbia">IL NOME, IL NUMERO, LA GABBIA</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Collana Libri Teoria e Manuali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280300/blockchain-e-criptovalute-per-principianti---vol-i---manuale-base">Blockchain e Criptovalute per Principianti - Vol. I - Manuale Base</a></li>
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280303/blockchain-avanzata:-defi-dao-e-smart-contract---vol2---manuale-avanzato">Blockchain Avanzata: DeFi, DAO e Smart Contract - Vol.2 - Manuale Avanzato</a></li>
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/blog-detail/post/280304/bitcoin-trading-e-analisi-tecnica:-guida-completa-per-trader---vol-3---manuale-tecnico">Bitcoin Trading e Analisi Tecnica: Guida Completa per Trader - Vol. 3 - Manuale Tecnico</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h3>Strategie Fiscali</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="articles">
+                            <ul class="article-list">
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/libro/ottimizzazione">Ottimizzazione Fiscale Legale per Imprenditori</a></li>
+                                <li><i class="fas fa-book"></i> <a href="https://cryptohorizonbanksolution.com/libro/residenze">Residenze Fiscali: Guida alle Giurisdizioni Preferite</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Struttura Gerarchica di Categorie, Articoli e Libri. Tutti i diritti riservati.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestione dell'espansione delle categorie
+            const categoryHeaders = document.querySelectorAll('.category-header');
+            categoryHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const category = this.parentElement;
+                    category.classList.toggle('expanded');
+                });
+            });
+            
+            // Gestione dell'espansione delle sottocategorie
+            const subcategoryHeaders = document.querySelectorAll('.subcategory-header');
+            subcategoryHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const subcategory = this.parentElement;
+                    subcategory.classList.toggle('expanded');
+                });
+            });
+            
+            // FUNZIONE DI RICERCA MIGLIORATA
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const searchResultsMessage = document.getElementById('search-results-message');
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                // Nascondi il messaggio dei risultati
+                searchResultsMessage.style.display = 'none';
+                
+                if (!searchTerm) {
+                    // Ripristina tutto se la ricerca è vuota
+                    document.querySelectorAll('.category, .subcategory, .article-list li').forEach(el => {
+                        el.style.display = '';
+                    });
+                    document.querySelectorAll('.highlight').forEach(el => {
+                        const text = el.innerHTML;
+                        el.outerHTML = text;
+                    });
+                    return;
+                }
+                
+                let resultsFound = 0;
+                
+                // Rimuovi evidenziazioni precedenti
+                document.querySelectorAll('.highlight').forEach(el => {
+                    const text = el.innerHTML;
+                    el.outerHTML = text;
+                });
+                
+                // Cerca negli articoli
+                const articleLinks = document.querySelectorAll('.article-list li a');
+                let anyArticleFound = false;
+                
+                articleLinks.forEach(link => {
+                    const text = link.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        anyArticleFound = true;
+                        resultsFound++;
+                        
+                        // Evidenzia il termine
+                        const highlightedText = link.innerHTML.replace(
+                            new RegExp(searchTerm, 'gi'),
+                            match => `<span class="highlight">${match}</span>`
+                        );
+                        link.innerHTML = highlightedText;
+                        
+                        // Mostra l'elemento e i suoi genitori
+                        const li = link.closest('li');
+                        const subcategory = li.closest('.subcategory');
+                        const category = subcategory.closest('.category');
+                        
+                        li.style.display = '';
+                        subcategory.style.display = '';
+                        category.style.display = '';
+                        
+                        // Espandi i genitori
+                        subcategory.classList.add('expanded');
+                        category.classList.add('expanded');
+                    }
+                });
+                
+                // Cerca nei titoli delle sottocategorie
+                const subcategoryTitles = document.querySelectorAll('.subcategory-header h3');
+                
+                subcategoryTitles.forEach(title => {
+                    const text = title.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        resultsFound++;
+                        
+                        // Evidenzia il termine
+                        const highlightedText = title.innerHTML.replace(
+                            new RegExp(searchTerm, 'gi'),
+                            match => `<span class="highlight">${match}</span>`
+                        );
+                        title.innerHTML = highlightedText;
+                        
+                        // Mostra l'elemento e i suoi genitori
+                        const subcategory = title.closest('.subcategory');
+                        const category = subcategory.closest('.category');
+                        
+                        subcategory.style.display = '';
+                        category.style.display = '';
+                        
+                        // Espandi i genitori
+                        subcategory.classList.add('expanded');
+                        category.classList.add('expanded');
+                    }
+                });
+                
+                // Cerca nei titoli delle categorie
+                const categoryTitles = document.querySelectorAll('.category-header h2');
+                
+                categoryTitles.forEach(title => {
+                    const text = title.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        resultsFound++;
+                        
+                        // Evidenzia il termine
+                        const highlightedText = title.innerHTML.replace(
+                            new RegExp(searchTerm, 'gi'),
+                            match => `<span class="highlight">${match}</span>`
+                        );
+                        title.innerHTML = highlightedText;
+                        
+                        // Mostra l'elemento
+                        const category = title.closest('.category');
+                        category.style.display = '';
+                        
+                        // Espandi la categoria
+                        category.classList.add('expanded');
+                    }
+                });
+                
+                // Nascondi gli elementi che non corrispondono
+                if (resultsFound > 0) {
+                    document.querySelectorAll('.category').forEach(category => {
+                        if (category.style.display !== '') {
+                            category.style.display = 'none';
+                        }
+                    });
+                    
+                    // Mostra il messaggio con il numero di risultati
+                    searchResultsMessage.textContent = `Trovati ${resultsFound} risultati per: "${searchTerm}"`;
+                    searchResultsMessage.style.display = 'block';
+                } else {
+                    // Nessun risultato trovato
+                    searchResultsMessage.textContent = `Nessun risultato trovato per: "${searchTerm}"`;
+                    searchResultsMessage.style.display = 'block';
+                }
+            }
+            
+            // Aggiungi event listeners per la ricerca
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
